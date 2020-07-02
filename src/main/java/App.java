@@ -12,9 +12,57 @@ public class App {
         this.salesPromotionRepository = salesPromotionRepository;
     }
 
-    public String bestCharge(List<String> inputs) {
-        //TODO: write code here
-
-        return null;
+    public String bestCharge(List<String> inputs){
+        String detailStr = "============= Order details =============\n";
+        double totalOrderCount = 0.0;
+        HashMap<Item,Double> promoItem = new LinkedHashMap<Item,Double>();
+        List<Item> itemRepo = itemRepository.findAll();
+        for(String order : inputs){
+            String itemIdAndCount[] = order.split("x");
+            for(Item eachItem : itemRepo){
+                if(eachItem.getId().equals(itemIdAndCount[0].trim())){
+                    double itemCount = Double.parseDouble(itemIdAndCount[1].trim());
+                    double eachOrderCount = eachItem.getPrice() * itemCount;
+                    totalOrderCount += eachOrderCount;
+                    detailStr+=(eachItem.getName()+" x " +(int)itemCount+" = "+(int)eachOrderCount+" yuan\n");
+                    if(salesPromotionRepository.findAll().get(1).getRelatedItems().contains(eachItem.getId())){
+                        promoItem.put(eachItem,itemCount);
+                    }
+                    break;
+                }
+            }
+        }
+        detailStr+=("-----------------------------------\n");
+        if(promoItem.isEmpty() && totalOrderCount < 30){
+            detailStr+=("Total："+(int)totalOrderCount+" yuan\n===================================");
+            return detailStr;
+        }else{
+            detailStr+=("Promotion used:\n");
+            double promo1 = totalOrderCount - 6;
+            double promo2 = totalOrderCount;
+            String certainItemStr = "";
+            if(!promoItem.isEmpty()){
+                for (Item eachItem : promoItem.keySet()) {
+                    promo2 -= promoItem.get(eachItem) * eachItem.getPrice() / 2;
+                    certainItemStr+=(eachItem.getName()+"，");
+                }
+                certainItemStr = certainItemStr.substring(0,certainItemStr.length()-1);
+            }
+            if(promo1 <= promo2){
+                detailStr+=("满30减6 yuan，saving 6 yuan\n"+
+                        "-----------------------------------\n"+
+                        "Total："+(int)promo1+" yuan\n"+
+                        "===================================");
+            }
+            else {
+                detailStr+=("Half price for certain dishes ("+certainItemStr+
+                        ")，saving "+(int)(totalOrderCount-promo2)+" yuan\n"+
+                        "-----------------------------------\n"+
+                        "Total："+(int)promo2+" yuan\n"+
+                        "==================================="
+                );
+            }
+            return detailStr;
+        }
     }
 }
