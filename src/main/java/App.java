@@ -1,3 +1,5 @@
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /*
@@ -12,7 +14,7 @@ public class App {
         this.salesPromotionRepository = salesPromotionRepository;
     }
 
-    public String bestCharge(List<String> inputs){
+    public String bestCharge(List<String> inputs) {
         String detailStr = "============= Order details =============\n";
         double totalOrderCount = 0.0;
         HashMap<Item,Double> promoItem = new LinkedHashMap<Item,Double>();
